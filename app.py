@@ -50,11 +50,22 @@ col1, col_spacer_1, col2, col_spacer_2, = st.columns((1, 0.2, 0.6, 0.4))
 # section_text_size = 9.5
 # header_fontsize = 21.3
 
+#W
+#style = 'standard'
+#style = 'corp'
+
+
 font_size_1 = col2.slider("Name font size:", min_value=12.0, max_value=18.5, value=15.5, step = 0.1)
 font_size_2 = col2.slider("Title font size:", min_value=6.0, max_value=12.6, value=8.6, step = 0.1)
 font_size_3 = col2.slider("Contact info font size:", min_value=6.0, max_value=11.0, value=8.0, step = 0.1)
-# image_size = col2.slider("Image size:", min_value=100, max_value=160, value=120, step = 1)
-col2.write('###')
+#font_size_4 = col2.slider("Image size:", min_value=100, max_value=160, value=120, step = 1)
+style = col2.selectbox(
+    'Card style:',
+    ('Standard', 'Corporate'),
+    index=None,
+    placeholder = "Select option"
+)
+#col2.write('###')
 
 # ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
 #     background: rgb(1 1 1 / 0%); } </style>''', unsafe_allow_html = True)
@@ -78,7 +89,7 @@ col2.write('###')
 
 #col1.write("#### Please upload the Excel file and images:")
 uploaded_files = col1.file_uploader(
-    label="Please upload the Excel file and images:",
+    label="Please upload the Excel file:",
     #label_visibility = "collapsed",
     type=[
         "xlsx",
@@ -200,10 +211,11 @@ def create_pdfs(file_dict, text_size, section_text_size, header_fontsize):
     vertical_distance_between_fields_2 = 20
     vertical_distance_between_fields_3 = 24
 
-    font_path_1 = 'Avenir Black adj 0,97.ttf'
-    font_path_2 = 'Avenir Regular.ttf' #'Avenir-Black adj3.ttf' #'Avenir-Regular adj 2.ttf'
-    font_path_3 = 'Avenir Heavy adj.ttf'
-    font_path_4 = 'Avenir-Regular 0,98.ttf'
+    #W
+    font_path_1 = 'assets/Avenir Black adj 0,97.ttf'
+    font_path_2 = 'assets/Avenir Regular.ttf' #'Avenir-Black adj3.ttf' #'Avenir-Regular adj 2.ttf'
+    font_path_3 = 'assets/Avenir Heavy adj.ttf'
+    font_path_4 = 'assets/Avenir-Regular 0,98.ttf'
 
     font_1 = fitz.Font("font1", font_path_1) #fitz.Font("NoeDisplayBoldCheck", "NoeDisplay-Bold.ttf")
     font_2 = fitz.Font("font2", font_path_2) #fitz.Font("PoppinsRegularCheck", "Poppins-Light.otf")
@@ -596,8 +608,8 @@ def create_pdfs(file_dict, text_size, section_text_size, header_fontsize):
 
     for sheet_name in sheet_names:
         try:
-            doc = fitz.open("temp.pdf")
-            page = doc[1]
+            #doc = fitz.open("temp.pdf")
+            # page = doc[1]
             # page.insert_font("NoeDisplayBold", "NoeDisplay-Bold.ttf")
             # page.insert_font("PoppinsRegular", "Poppins-Light.otf")
             # page.insert_font('PoppinsRegular2', 'Poppins-Medium-1.otf')
@@ -653,83 +665,108 @@ def create_pdfs(file_dict, text_size, section_text_size, header_fontsize):
                     # title = r["Title"]
                     # name = title.upper()
 
-                    doc = fitz.open("temp.pdf")
+                    #W
+                    if style == 'Standard':
+                        doc = fitz.open("assets/temp.pdf")
+                        
+                        ###############################
+                        #PAGE 1
 
+                        page = doc[1]
+                        page.insert_font("font1", font_path_1)
+                        page.insert_font("font2", font_path_2)
+                        page.insert_font("font3", font_path_3)
+                        page.insert_font("font4", font_path_4)
 
-                    ###############################
-                    #PAGE 1
+                        y = start_y - vertical_distance_between_people
 
-                    page = doc[1]
-                    page.insert_font("font1", font_path_1)
-                    page.insert_font("font2", font_path_2)
-                    page.insert_font("font3", font_path_3)
-                    page.insert_font("font4", font_path_4)
+                        
+                        info_list_1 = get_split_string_or_empty_list(r["Email"], my_font = font_2, my_font_size = font_size_3, input_x = 82, )
+                        info_list_2 = get_split_string_or_empty_list(r["Phone"], my_font = font_2, my_font_size = font_size_3, input_x = 82, )
 
-                    y = start_y - vertical_distance_between_people
+                        insert_text_(name, 82, 49.5, font_path_1, 'font1', font_size_1, color = (1.0, 1.0, 1.0), ) #  (0.0627451, 0.18039216, 0.2627451)
 
+                        for i, info in enumerate(get_split_string_or_empty_list(r["Title"], my_font = font_3, my_font_size = font_size_2, input_x = 82, )):
+                            y = 61
+                            if i > 0:
+                                y = y + 8.5
+                            insert_text_(info, 82, y, font_path_1, 'font3', font_size_2, color = (1.0, 1.0, 1.0), )
+
+                        for i, info_1 in enumerate(info_list_1):
+                            if i == 0:
+                                y = y + vertical_distance_between_fields_1
+                            else:
+                                y = y + vertical_distance_same_field
+                            insert_text_(info_1, 93, 93, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
+
+                        for i, info_2 in enumerate(info_list_2):
+                            if i == 0:
+                                y = y + vertical_distance_between_fields_2
+                            else:
+                                y = y + vertical_distance_same_field
+                            insert_text_(info_2, 93, 110, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
+
+                        ###############################
+                        #PAGE 3
+
+                        page = doc[3]
+                        page.insert_font("font1", font_path_1)  
+                        page.insert_font("font2", font_path_2)
+                        page.insert_font("font3", font_path_3)
+                        y = start_y - vertical_distance_between_people
+
+                        info_list_1 = get_split_string_or_empty_list(r["Email"], my_font = font_2, my_font_size = font_size_3, input_x = 12, )
+                        info_list_2 = get_split_string_or_empty_list(r["Phone"], my_font = font_2, my_font_size = font_size_3, input_x = 12, )
+                        #info_list_3 = get_split_string_or_empty_list(r["Title"], 12)
+
+                        insert_text_(name, 12, 49.5, font_path_1, 'font1', font_size_1, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), ) #  (0.0627451, 0.18039216, 0.2627451)
+
+                        #insert_text_(r["Title"], 12, 59, font_path_1, 'font3', 8.6, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), )
+                        for i, info in enumerate(get_split_string_or_empty_list(r["Title"], my_font = font_3, my_font_size = font_size_2, input_x = 12, )):
+                            y = 61
+                            if i > 0:
+                                y = y + 8.5
+                            insert_text_(info, 12, y, font_path_1, 'font3', font_size_2, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), )
+
+                        for i, info_1 in enumerate(info_list_1):
+                            if i == 0:
+                                y = y + vertical_distance_between_fields_1
+                            else:
+                                y = y + vertical_distance_same_field
+                            insert_text_(info_1, 24, 112, font_path_2, 'font2', font_size_3, color = (0.9450980392156862, 0.3137254901960784, 0.3058823529411765), ) # 
+
+                        for i, info_2 in enumerate(info_list_2):
+                            if i == 0:
+                                y = y + vertical_distance_between_fields_2
+                            else:
+                                y = y + vertical_distance_same_field
+                            insert_text_(info_2, 24, 129, font_path_2, 'font2', font_size_3, color = (0.9450980392156862, 0.3137254901960784, 0.3058823529411765), )
+                    elif style == 'Corporate':
+                        #W
+                        doc = fitz.open("assets/temp_corp.pdf")
+
+                        page = doc[1]
+                        page.insert_font("font1", font_path_1)
+                        page.insert_font("font2", font_path_2)
+                        page.insert_font("font3", font_path_3)
+                        page.insert_font("font4", font_path_4)
+
+                        insert_text_(name, 83, 49.5, font_path_1, 'font1', font_size_1, color = (1.0, 1.0, 1.0), ) #  (0.0627451, 0.18039216, 0.2627451)
+                        insert_text_(r["Title"], 83, 59, font_path_1, 'font2', font_size_2, color = (1.0, 1.0, 1.0), )
+                        insert_text_(r["Email"], 93.5, 90.5, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
+                        insert_text_(r["Phone"], 93.5, 107.5, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
+                        try:
+                            address = r["Address"]
+                        except:
+                            address = ''
+                        insert_text_(address, 93.5, 124.5, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
+                    else:
+                        my_bar.success('Select card style to proceed')
+                        st.stop()
+                        
                     
-                    info_list_1 = get_split_string_or_empty_list(r["Email"], my_font = font_2, my_font_size = font_size_3, input_x = 82, )
-                    info_list_2 = get_split_string_or_empty_list(r["Phone"], my_font = font_2, my_font_size = font_size_3, input_x = 82, )
-
-                    insert_text_(name, 82, 49.5, font_path_1, 'font1', font_size_1, color = (1.0, 1.0, 1.0), ) #  (0.0627451, 0.18039216, 0.2627451)
-
-                    for i, info in enumerate(get_split_string_or_empty_list(r["Title"], my_font = font_3, my_font_size = font_size_2, input_x = 82, )):
-                        y = 61
-                        if i > 0:
-                            y = y + 8.5
-                        insert_text_(info, 82, y, font_path_1, 'font3', font_size_2, color = (1.0, 1.0, 1.0), )
-
-                    for i, info_1 in enumerate(info_list_1):
-                        if i == 0:
-                            y = y + vertical_distance_between_fields_1
-                        else:
-                            y = y + vertical_distance_same_field
-                        insert_text_(info_1, 93, 93, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
-
-                    for i, info_2 in enumerate(info_list_2):
-                        if i == 0:
-                            y = y + vertical_distance_between_fields_2
-                        else:
-                            y = y + vertical_distance_same_field
-                        insert_text_(info_2, 93, 110, font_path_2, 'font2', font_size_3, color = (1.0, 1.0, 1.0), )
-
-                    ###############################
-                    #PAGE 3
-
-                    page = doc[3]
-                    page.insert_font("font1", font_path_1)  
-                    page.insert_font("font2", font_path_2)
-                    page.insert_font("font3", font_path_3)
-                    y = start_y - vertical_distance_between_people
-
-                    info_list_1 = get_split_string_or_empty_list(r["Email"], my_font = font_2, my_font_size = font_size_3, input_x = 12, )
-                    info_list_2 = get_split_string_or_empty_list(r["Phone"], my_font = font_2, my_font_size = font_size_3, input_x = 12, )
-                    #info_list_3 = get_split_string_or_empty_list(r["Title"], 12)
-
-                    insert_text_(name, 12, 49.5, font_path_1, 'font1', font_size_1, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), ) #  (0.0627451, 0.18039216, 0.2627451)
-
-                    #insert_text_(r["Title"], 12, 59, font_path_1, 'font3', 8.6, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), )
-                    for i, info in enumerate(get_split_string_or_empty_list(r["Title"], my_font = font_3, my_font_size = font_size_2, input_x = 12, )):
-                        y = 61
-                        if i > 0:
-                            y = y + 8.5
-                        insert_text_(info, 12, y, font_path_1, 'font3', font_size_2, color = (0.050980392156862744, 0.7058823529411765, 0.8156862745098039), )
-
-                    for i, info_1 in enumerate(info_list_1):
-                        if i == 0:
-                            y = y + vertical_distance_between_fields_1
-                        else:
-                            y = y + vertical_distance_same_field
-                        insert_text_(info_1, 24, 112, font_path_2, 'font2', font_size_3, color = (0.9450980392156862, 0.3137254901960784, 0.3058823529411765), ) # 
-
-                    for i, info_2 in enumerate(info_list_2):
-                        if i == 0:
-                            y = y + vertical_distance_between_fields_2
-                        else:
-                            y = y + vertical_distance_same_field
-                        insert_text_(info_2, 24, 129, font_path_2, 'font2', font_size_3, color = (0.9450980392156862, 0.3137254901960784, 0.3058823529411765), )
-
                     my_bar.empty()
+                    my_bar.write('###')
 
                     # name = "{} {}".format(
                     #     r["First Name"],
@@ -887,7 +924,7 @@ def create_pdfs(file_dict, text_size, section_text_size, header_fontsize):
 
 
 with col2:
-    #with st.spinner("Creating PDFs..."):
+    # with st.spinner("Creating PDFs..."):
         # # delete a list of files
         # temporary_exceptions = ["Avera St. Luke's.pdf", "Westover Hills.pdf"]
         # files_to_remove = [
@@ -933,7 +970,7 @@ elif len(pdf_dict) > 1:
         for sheet_name in pdf_dict:
             zf.writestr("{}.pdf".format(sheet_name), pdf_dict[sheet_name])
 
-    #with open("inputs.zip", "rb") as fp:
+    # with open("inputs.zip", "rb") as fp:
     col4.download_button(
         label="Download PDFs",
         data=z,
